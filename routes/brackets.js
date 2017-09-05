@@ -1,9 +1,11 @@
 'use strict';
 
+const config = require('config');
 const debug = require('debug')('routes:brackets');
 const fs = require('fs');
 const http = require('http');
 const https = require('https');
+const httpMock = require('node-mocks-http');
 const path = require('path');
 const urlUtil = require('url');
 
@@ -16,13 +18,16 @@ const zipped = { '.js': 'application/javascript', '.css': 'text/css'};
 module.exports = function(express, server, wsServer) {
   const router = express.Router();
 
-  router.get('/*', util.isLoggedIn, (req, res, next) => {
+  router.get('/*',  util.isLoggedIn, (req, res, next) => {
     const url = req.url;
 
     if (url.startsWith('/proxy/')) {
       const reqUrl = decodeURIComponent(url.substr('/proxy/'.length));
       let options = urlUtil.parse(reqUrl);
       const httpClient  = options.protocol === 'http' ? http : https;
+      if (config.util.getEnv('NODE_ENV') === 'test') {
+        httpClient = httpMock;
+      } 
 
       delete options.protocol;
       options.method = 'GET';

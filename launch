@@ -404,6 +404,11 @@ Please ensure to execute tizen command if use WGT packaging.''')
     % (pkg_manager, pkg_manager), shell=True)
   return os.path.dirname(tizen_path)
 
+def build_brackets():
+  subprocess.check_call('cd libs/brackets-server/brackets-dist 2>/dev/null' \
+    '|| { cd libs/brackets-server; grunt build; }', shell=True)
+  return 0;
+
 def run_service(verbose):
   print_msg = True
   need_rebuild = False
@@ -527,6 +532,9 @@ def main():
     return 1
 
   if not check_mongodb():
+    return 1
+
+  if not build_breaks():
     return 1
 
   if args.emscripten_path == None or not os.path.isdir(args.emscripten_path):
